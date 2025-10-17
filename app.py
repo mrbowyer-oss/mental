@@ -18,9 +18,9 @@ def debug():
 
 @app.route("/scrape")
 def scrape():
-    return asyncio.run(fetch_status())
+    return asyncio.run(fetch_html())
 
-async def fetch_status():
+async def fetch_html():
     try:
         from playwright.async_api import async_playwright
         import shutil
@@ -35,10 +35,9 @@ async def fetch_status():
                 executable_path=chromium_path
             )
             page = await browser.new_page()
-            await page.goto("https://davyhulme.intelligentgolf.co.uk/visitorbooking/", timeout=20000)
-            await page.wait_for_selector(".igcourse_status_text", timeout=10000)
-            text = await page.inner_text(".igcourse_status_text")
+            await page.goto("https://davyhulme.intelligentgolf.co.uk/visitorbooking/", timeout=30000)
+            content = await page.content()
             await browser.close()
-            return f"✅ Status: {text}"
+            return content[:3000]  # return first 3,000 characters to debug
     except Exception as e:
         return f"❌ Error: {str(e)}"
