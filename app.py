@@ -11,9 +11,9 @@ def course_status():
 async def fetch_status():
     try:
         async with async_playwright() as p:
-            browser = await p.chromium.launch(
+    browser = await p.chromium.launch(
     headless=True,
-    executable_path="/usr/bin/chromium"      # <-- path of system Chromium
+    executable_path="/usr/bin/chromium"
 )
 
             page = await browser.new_page()
