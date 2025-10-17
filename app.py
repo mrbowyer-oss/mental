@@ -1,26 +1,8 @@
-from flask import Flask
-import asyncio
-
-app = Flask(__name__)
-
-@app.route("/")
-def home():
-    return "✅ Flask is alive. No crash with Playwright deferred."
-
-@app.route("/debug")
-def debug():
-    try:
-        import shutil
-        chromium_path = shutil.which("chromium") or shutil.which("chromium-browser")
-        return f"Chromium path: {chromium_path or 'Not found'}"
-    except Exception as e:
-        return f"Error: {str(e)}"
-
 @app.route("/scrape")
 def scrape():
-    return asyncio.run(fetch_html())
+    return asyncio.run(fetch_status())
 
-async def fetch_html():
+async def fetch_status():
     try:
         from playwright.async_api import async_playwright
         import shutil
@@ -36,8 +18,11 @@ async def fetch_html():
             )
             page = await browser.new_page()
             await page.goto("https://davyhulme.intelligentgolf.co.uk/visitorbooking/", timeout=30000)
-            content = await page.content()
+
+            # ✅ Updated selector
+            await page.wait_for_selector(".coursestatus", timeout=10000)
+            text = await page.inner_text(".coursestatus")
             await browser.close()
-            return content[:3000]  # return first 3,000 characters to debug
+            return f"✅ Course Status: {text}"
     except Exception as e:
-        return f"❌ Error: {str(e)}"
+        return f"❌ Error fetching course status: {str(e)}"
