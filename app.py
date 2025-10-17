@@ -1,3 +1,23 @@
+from flask import Flask, jsonify
+from flask_cors import CORS
+import asyncio
+import os
+
+app = Flask(__name__)
+CORS(app)
+
+@app.route("/")
+def home():
+    return "✅ Flask is alive."
+
+@app.route("/cached")
+def cached():
+    try:
+        with open("status.txt") as f:
+            return f.read()
+    except:
+        return "⚠️ No cached status available."
+
 @app.route("/scrape-and-cache")
 def scrape_and_cache():
     return asyncio.run(fetch_and_cache())
@@ -5,11 +25,11 @@ def scrape_and_cache():
 async def fetch_and_cache():
     try:
         from playwright.async_api import async_playwright
-        import shutil
+        from shutil import which
 
-        chromium_path = shutil.which("chromium") or shutil.which("chromium-browser")
+        chromium_path = which("chromium") or which("chromium-browser")
         if not chromium_path:
-            return "Chromium not found."
+            return "❌ Chromium not found."
 
         async with async_playwright() as p:
             browser = await p.chromium.launch(
@@ -24,6 +44,7 @@ async def fetch_and_cache():
 
             with open("status.txt", "w") as f:
                 f.write(text)
-            return f"✅ Cached: {text}"
+
+            return f"✅ Scraped and cached: {text}"
     except Exception as e:
         return f"❌ Error: {str(e)}"
