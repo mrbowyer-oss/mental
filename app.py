@@ -11,7 +11,11 @@ def course_status():
 async def fetch_status():
     try:
         async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True)
+            browser = await p.chromium.launch(
+    headless=True,
+    executable_path="/usr/bin/chromium"      # <-- path of system Chromium
+)
+
             page = await browser.new_page()
             await page.goto("https://davyhulme.intelligentgolf.co.uk/visitorbooking/", timeout=20000)
             await page.wait_for_selector(".igcourse_status_text", timeout=10000)
